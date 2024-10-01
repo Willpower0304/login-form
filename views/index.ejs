@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Registration Forms</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: #f4f4f4;
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container-form {
+        padding: 30px 40px;
+      }
+
+      .container-form h2 {
+        text-align: center;
+        margin: 0 0 20px;
+      }
+
+      .container-form p {
+        text-align: center;
+      }
+
+      .container-form input {
+        appearance: none;
+        border: 1px solid #ccc;
+        outline: none;
+        display: block;
+        width: 100%;
+        padding: 10px 15px;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+
+      .container-form label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 15px;
+        font-weight: 600;
+        color: rgb(85, 85, 85);
+      }
+
+      .container-form button {
+        appearance: none;
+        outline: none;
+        border: none;
+        background-color: #000000;
+        color: #fff;
+        display: block;
+        width: 100%;
+        padding: 10px 10px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 10px;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+
+      .container-form {
+        background-color: #fff;
+        padding: 20px 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        width: 100%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <% if (typeof username !== "undefined") { %>
+      <div class="container-form">
+        <h2>Hola <%= username %>!</h2>
+        <p>Estas en el panel de administración</p>
+        <button id="close-session">Cerrar sesión</button>
+      </div>
+      <% } %> <% if (typeof username === "undefined") { %>
+      <div class="container-form">
+        <form id="login-form">
+          <h2>Login</h2>
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" name="username" required />
+
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" required />
+
+          <button type="submit">Login</button>
+          <span>&nbsp;</span>
+        </form>
+      </div>
+
+      <div class="container-form">
+        <form id="register-form">
+          <h2>Register</h2>
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" name="username" required />
+
+          <label for="register-password">Password</label>
+          <input
+            type="password"
+            id="register-password"
+            name="password"
+            required
+          />
+
+          <label for="register-confirm-password">Confirm Password</label>
+          <input
+            type="password"
+            id="register-confirm-password"
+            name="confirm-password"
+            required
+          />
+
+          <button type="submit">Register</button>
+          <span>&nbsp;</span>
+        </form>
+      </div>
+      <% } %>
+    </div>
+
+    <script>
+      const $ = (el) => document.querySelector(el);
+
+      const loginForm = $("#login-form");
+      const loginSpan = $("#login-form span");
+      const registerForm = $("#register-form");
+      const registerSpan = $("#register-form span");
+      const logoutButton = $("#close-session");
+
+      loginForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = $("#login-username").value;
+        const password = $("#login-password").value;
+
+        fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }).then((res) => {
+          if (res.ok) {
+            loginSpan.innerHTML = "Iniciando sesión...";
+            loginSpan.style.color = "green";
+            setTimeout(() => {
+              window.location.href = "/protected";
+            }, 2000);
+          } else {
+            loginSpan.innerHTML = "Error al iniciar sesión";
+            loginSpan.style.color = "red";
+          }
+        });
+      });
+
+      registerForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const username = $("#register-username").value;
+        const password = $("#register-password").value;
+        const confirmPassword = $("#register-confirm-password").value;
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match");
+          return;
+        }
+
+        fetch("/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }).then((res) => {
+          console.log(res);
+          if (res.ok) {
+            registerSpan.innerHTML = "Usuario Registrado";
+            registerSpan.style.color = "green";
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 2000);
+          } else {
+            registerSpan.innerHTML = "Error al registrar usuario";
+            registerSpan.style.color = "red";
+          }
+        });
+      });
+
+      logoutButton?.addEventListener("click", (e) => {
+        e.preventDefault();
+        fetch("/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((res) => {
+          console.log(res);
+          window.location.href = "/";
+        });
+      });
+    </script>
+  </body>
+</html>
